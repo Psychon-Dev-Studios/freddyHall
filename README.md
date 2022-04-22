@@ -16,9 +16,9 @@ When you run Freddy's Hall, or the installer, the following dependencies will be
 - Pygame Widgets
 - Win32Com for Python
 
-Minimum Specs:
+Minimum (recommended) specs:
 CPU: intel CORE i5 8th gen w/ hyperthreading enabled, or better
-GPU: 
+GPU: Intel UHD Graphics 620, or better
 RAM: 8 GB
 
 ## Install Freddy's Hall
