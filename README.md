@@ -1,7 +1,7 @@
 # Freddy's Hall
 
 Welcome to PDS's first proper attempt at a FNaF Fangame!
-### **PUBLIC LAUNCH DATE: 5/20/22**
+### **PUBLIC LAUNCH DATE: 9/12/22**
 Note: Launch date is subject to change, depending on external factors
 
 
