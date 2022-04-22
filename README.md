@@ -17,9 +17,9 @@ When you run Freddy's Hall, or the installer, the following dependencies will be
 - Win32Com for Python
 
 Minimum (recommended) specs:
-CPU: intel CORE i5 8th gen w/ hyperthreading enabled, or better
-GPU: Intel UHD Graphics 620, or better
-RAM: 8 GB
+- CPU: intel CORE i5 8th gen w/ hyperthreading enabled, or better
+- GPU: Intel UHD Graphics 620, or better
+- RAM: 8 GB
 
 ## Install Freddy's Hall
 Unfortunately, the process to install Freddy's Hall is a bit complicated. However, you should be fine if you follow these instructions!
