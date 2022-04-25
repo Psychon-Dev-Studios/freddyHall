@@ -1,9 +1,21 @@
-import pygame, pygame_widgets, os, tkinter
+import pygame, pygame_widgets, os, tkinter, time as systime, sys, subprocess
 from tkinter import messagebox
 from pygame_widgets.button import Button
+from modules.fakes import KIOSK_MODE
 from modules.freddy import PATH
+from modules.settingsMenu import *
 from modules.constants import manifest, WINDRIVE
 from pygame import RLEACCEL, USEREVENT, KEYDOWN, K_RETURN, font
+from importlib.util import spec_from_loader, module_from_spec
+from importlib.machinery import SourceFileLoader
+try:
+    spec = spec_from_loader("settings", SourceFileLoader("settings", PATH + "/settings/game.conf"))
+    sets = module_from_spec(spec)
+    spec.loader.exec_module(sets)
+    sys.modules['config'] = sets
+
+    from config import *
+except:NotImplemented
 
 def about(screen):
     stayInMenu = True
@@ -72,9 +84,14 @@ def uninstall(screen):
         pygame.display.update()
 
     u.hide();c.hide()
+    if (KIOSK_MODE == True):
+        subprocess.call("explorer.exe")
     return None
 
-def quitGame():
+def quitGame(p,s,e,a,u):
+    u.hide();a.hide();e.hide(); p.hide();s.hide()
+    systime.sleep(0.2)
+    pygame.display.update()
     # This code will only be run after the main loop has exited safely (didn't crash)
     print("Cleaning up...")
 
@@ -84,6 +101,8 @@ def quitGame():
     open(PATH + "/data/time", "w").write("12")
     open(PATH + "/data/leftDoorStatus", "w").write("open")
     open(PATH + "/data/rightDoorStatus", "w").write("open")
+    if (KIOSK_MODE == True):
+        subprocess.run("explorer.exe")
     os.abort()
 
 
@@ -91,25 +110,44 @@ def quitGame():
 def main_menu(screen):
     stayInMenu = True
     multimode = os.path.isfile(PATH + "/data/client")
+    pygame.mixer.music.load(PATH + "/assets/audio/mmenu_loop-temp2.wav")
+    pygame.mixer.music.play(-1, fade_ms=3000)
 
     """SCREEN, X,Y,WID,HEIG"""
-    if not multimode:p=Button(screen,1700,200,150,95,text='PLAY',fontSize=50,margin=20,inactiveColour=(100, 100, 100),hoverColour=(90, 200, 90),pressedColour=(200, 0, 0),radius=20,onClick=lambda: pygame.event.post(pygame.event.Event(USEREVENT + 0)))
-    else:p=Button(screen,1700,200,150,95,text='JOIN',fontSize=50,margin=20,inactiveColour=(100, 130, 0),hoverColour=(90, 200, 90),pressedColour=(200, 0, 0),radius=20,onClick=lambda: pygame.event.post(pygame.event.Event(USEREVENT + 0)))
-    e=Button(screen,1700,350,150,95,text='EXIT',fontSize=50,margin=20,inactiveColour=(100, 100, 100),hoverColour=(200, 90, 90),pressedColour=(90, 90, 90),radius=20,onClick=lambda: quitGame())
-    a=Button(screen,1700,500,150,95,text='ABOUT',fontSize=50,margin=20,inactiveColour=(100, 100, 100),hoverColour=(200, 90, 90),pressedColour=(90, 90, 90),radius=20,onClick=lambda: about(screen))
-    u=Button(screen,1700,650,150,95,text='UNINSTALL',fontSize=30,margin=20,inactiveColour=(130, 100, 100),hoverColour=(200, 90, 90),pressedColour=(255, 255, 255),radius=20,onClick=lambda: pygame.event.post(pygame.event.Event(USEREVENT + 1)))
+    if not multimode:p=Button(screen,1700,200,150,95,text='PLAY',fontSize=50,margin=20,inactiveColour=(180, 180, 180),hoverColour=(230, 230, 230),pressedColour=(180, 200, 180),radius=20,onClick=lambda: pygame.event.post(pygame.event.Event(USEREVENT + 0)))
+    else:p=Button(screen,1700,200,150,95,text='JOIN',fontSize=50,margin=20,inactiveColour=(180, 180, 100),hoverColour=(230, 230, 230),pressedColour=(180, 200, 180),radius=20,onClick=lambda: pygame.event.post(pygame.event.Event(USEREVENT + 0)))
+    s=Button(screen,1700,350,150,95,text='OPTIONS',fontSize=40,margin=20,inactiveColour=(180, 180, 180),hoverColour=(230, 230, 230),pressedColour=(180, 200, 180),radius=20,onClick=lambda: pygame.event.post(pygame.event.Event(USEREVENT + 2)))
+    e=Button(screen,1700,500,150,95,text='EXIT',fontSize=50,margin=20,inactiveColour=(200, 180, 180),hoverColour=(255, 230, 230),pressedColour=(90, 90, 90),radius=20,onClick=lambda: quitGame(p,s,e,a,u))
+    a=Button(screen,1700,650,150,95,text='ABOUT',fontSize=50,margin=20,inactiveColour=(180, 180, 180),hoverColour=(230, 230, 230),pressedColour=(180, 200, 180),radius=20,onClick=lambda: about(screen))
+    u=Button(screen,1700,800,150,95,text='UNINSTALL',fontSize=30,margin=20,inactiveColour=(180, 150, 150),hoverColour=(200, 90, 90),pressedColour=(255, 255, 255),radius=20,onClick=lambda: pygame.event.post(pygame.event.Event(USEREVENT + 1)))
+
+    if KIOSK_MODE == True:
+        e.hide()
+        u.hide()
+        s.hide()
 
     while stayInMenu == True:
         for event in pygame.event.get():
             if event.type == USEREVENT + 0:
                 stayInMenu = False
-                u.hide();a.hide();e.hide(); p.hide()
+                u.hide();a.hide();e.hide(); p.hide();s.hide()
 
             elif event.type == USEREVENT + 1:
                 screen.fill((0,0,0))
-                u.hide();a.hide();e.hide(); p.hide()
+                u.hide();a.hide();e.hide(); p.hide();s.hide()
                 uninstall(screen)
-                u.show();a.show();e.show(); p.show()
+                a.show();p.show()
+
+                if KIOSK_MODE == False:
+                    e.show(); u.show();s.show()
+
+            elif event.type == USEREVENT + 2:
+                u.hide();a.hide();e.hide(); p.hide();s.hide()
+                settings(screen)
+                a.show(); p.show()
+                if KIOSK_MODE == False:
+                    e.show(); u.show();s.show()
+                
 
 
         screen.fill((0,0,0))
@@ -133,7 +171,16 @@ def main_menu(screen):
         vinfo_box.bottomleft=(5, 1075)
         screen.blit(vinfo_display, vinfo_box) # Render
 
+        if (KIOSK_MODE == True):
+            txt = "Kiosk Mode"
+            pixel_font = font.Font(PATH + "/assets/fonts/fps.ttf", 22)
+            vinfo_display = pixel_font.render(txt, True, (255,255,255)) # Render the text
+            vinfo_box = vinfo_display.get_rect() # Get bounding box
+            vinfo_box.bottomright=(1915, 1075)
+            screen.blit(vinfo_display, vinfo_box) # Render
+
         pygame_widgets.update(pygame.event.get())
         pygame.display.update()
 
+    pygame.mixer.music.fadeout(2)
     pygame.mouse.set_visible(False)

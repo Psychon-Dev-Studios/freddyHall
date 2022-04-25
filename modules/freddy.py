@@ -31,6 +31,7 @@ def jumpscare(screen, SCREEN_WIDTH, SCREEN_HEIGHT, mixer: pygame.mixer, time): #
                     surf.set_colorkey((0,0,0), RLEACCEL) # Configures the image to be processed at full RGB spectrum at low quality (for speed)
                     rect = surf.get_rect(center=(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,)) # Centers the image
                     screen.blit(surf, rect) # Prepare the image to be shown on-screen
+                    pygame.event.get()
 
                     pygame.display.flip() # Update the screen
                     frameLooped += 1 # Update how many times the animation has looped
@@ -47,6 +48,7 @@ def jumpscare(screen, SCREEN_WIDTH, SCREEN_HEIGHT, mixer: pygame.mixer, time): #
                     surf.set_colorkey((0,0,0), RLEACCEL) # Configures the image to be processed at full RGB spectrum at low quality (for speed)
                     rect = surf.get_rect(center=(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,)) # Centers the image
                     screen.blit(surf, rect) # Prepare the image to be shown on-screen
+                    pygame.event.get()
 
                     pygame.display.flip() # Update the screen
                     frameLooped += 1 # Update how many times the animation has looped
@@ -59,6 +61,7 @@ def jumpscare(screen, SCREEN_WIDTH, SCREEN_HEIGHT, mixer: pygame.mixer, time): #
             surf.set_colorkey((0,0,0), RLEACCEL) # Configures the image to be processed at full RGB spectrum at low quality (for speed)
             rect = surf.get_rect(center=(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,)) # Centers the image
             screen.blit(surf, rect) # Prepare the image to be shown on-screen
+            pygame.event.get()
             pygame.display.flip() # Update the screen
 
             screen.fill((0,0,0))
@@ -66,6 +69,7 @@ def jumpscare(screen, SCREEN_WIDTH, SCREEN_HEIGHT, mixer: pygame.mixer, time): #
             surf.set_colorkey((0,0,0), RLEACCEL) # Configures the image to be processed at full RGB spectrum at low quality (for speed)
             rect = surf.get_rect(center=(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,)) # Centers the image
             screen.blit(surf, rect) # Prepare the image to be shown on-screen
+            pygame.event.get()
             pygame.display.flip() # Update the screen
             frameLooped += 1 # Update how many times the animation has looped
             clock.tick(60) # Limit to 60 FPS
@@ -100,6 +104,7 @@ def blackout_event(screen, mixer):
                 surf.set_colorkey((0,0,0), RLEACCEL) # Configures the image to be processed at full RGB spectrum at low quality (for speed)
                 rect = surf.get_rect(center=(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,)) # Centers the image
                 screen.blit(surf, rect) # Prepare the image to be shown on-screen
+                pygame.event.get()
 
                 pygame.display.flip()
                 looped += 1
@@ -131,6 +136,7 @@ def blackout_event(screen, mixer):
                 surf.set_colorkey((0,0,0), RLEACCEL) # Configures the image to be processed at full RGB spectrum at low quality (for speed)
                 rect = surf.get_rect(center=(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,)) # Centers the image
                 screen.blit(surf, rect) # Prepare the image to be shown on-screen
+                pygame.event.get()
 
                 pygame.display.flip() # Update the screen
                 frameLooped += 1 # Update how many times the animation has looped

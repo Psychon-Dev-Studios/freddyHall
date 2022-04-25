@@ -1,8 +1,17 @@
 """Enables the program to log various messages, such as crashes, internal errors, or warnings"""
 
-import os
+import os, subprocess, sys
 from threading import Thread as thread
 from scripts import alert_upon_crash
+from modules.fakes import *
+from importlib.util import spec_from_loader, module_from_spec
+from importlib.machinery import SourceFileLoader
+spec = spec_from_loader("settings", SourceFileLoader("settings", sys.path[0] + "/settings/game.conf"))
+sets = module_from_spec(spec)
+spec.loader.exec_module(sets)
+sys.modules['config'] = sets
+
+from config import *
 
 class manifest():
     appName = "Freddy's Hall"
@@ -35,6 +44,9 @@ def log_crash(reason,resolution):
 
         file.write(manifest.appName + " detected a crash: " + currentTime + " Cause: \"" + reason + "\" Screen resolution: \"%s\"\n" %(resolution)) # Write what happened to the crash report
         file.close()
+
+    if (KIOSK_MODE == True):
+        subprocess.run("explorer.exe")
 
     # Create the crash message in a seperate thread of control
     thread(name="crash_alert", target=throwCrashAlert).start()

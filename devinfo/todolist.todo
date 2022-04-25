@@ -1,0 +1,37 @@
+[x] Note: to get syntax highlighting, we use an extension that we've modified to add some spiffiness [x]
+
+# Syntax
+    [ ] Task
+    [x] Done
+    [?] Question
+    [!] Important
+    [o] Ongoing
+    [!!] Critical
+    [!!x] Done, was Critical
+    [-] Deleted
+
+# Feature Additions
+    [o] Add settings menu
+        [x] Add "hide disclaimer" setting
+        [ ] Add a reset button (with confirmation)
+        [x] Add "hide controls" setting
+        [x] Add "disable asset verification" setting
+    [o] Add user-changeable settings
+    [!] Add built-in update features
+        [x] Note: this will not function until the repository is public, so I'm not going to add updates for a while
+        [ ] Script to automatically check for updates
+        [ ] Script to download the data file
+        [ ] Script to unpack the extension file
+        [ ] Option to disable automatic updates
+
+# Safety Changes
+    [x] Add asset verification (make sure everything's there!)
+        [x] Create a script to index all assets in the folder to generate file index
+        [x] Create file verification script to compare validated
+
+    [!!x] Prevent crashes during animations
+
+
+# Functionality Changes
+    [x] AI Changes
+        [x] Update DJMM to the same style AI as Freddy
