@@ -17,10 +17,10 @@ Metallic Footsteps: Downloaded from https://www.zapsplat.com/music/footsteps-sto
 Door shutting: Downloaded from https://www.zapsplat.com/music/impact-heavy-metal-slam-wallop-2/. License: https://www.zapsplat.com/license-type/standard-license/. The sound has been edited slightly using Audacity
 ALL OTHER SOUNDS HAVE BEEN CREATED BY US AND ARE OUR OWN ORIGINAL WORK!
 """
-
 try:
     from modules import logging, verifier, freddy, djmm
     from modules.ui import *
+    from modules.fakes import *
     from modules.constants import * # Imports globally-used constants from a file, makes my life easier (contains stuff life SCREEN_WIDTH, SCREEN_HEIGHT, and FRAME_RATE)
     from modules.office.office import *
     from modules.office.camera import * # Import camera functionality
@@ -28,6 +28,7 @@ try:
     from modules.mainMenu import *
     from modules.networking import * # Multiplayer code. Entirely useless at this moment
     from scripts import show_startup_screens as startups
+    from scripts.dump_error_data import *
 except Exception as err:
     print(str(err))
     # Executes if one of the above modules failed to import. TK is installed on most systems by default, so we'll fall back to it since PyGame has yet to be initialized
@@ -38,8 +39,9 @@ except Exception as err:
     root.iconify()  
     root.title("FH Crash Handler")
 
-    messagebox.showerror("Fatal Error", "Freddy's hall has experienced a fatal error: %s. Make sure 'core' is in the project folder and all assets are present!" %str(err))
+    messagebox.showerror("Fatal Error", "This installation of Freddy's Hall seems to be damaged or broken.\nDebugging information has been dumped to your desktop.")
     root.destroy()
+    dumpDebugDataUponImportCrash(str(err))
     os.abort()
 
 verifier.verify_dependencies() # Has to run before the imports down below so PyGame is definitely installed (or things will go "boom")
@@ -49,10 +51,12 @@ try:
     import os, time as systime # import before PyGame, you'll see why in a moment
     os.environ[" "] = 'PYGAME_HIDE_SUPPORT_PROMPT' # Hide the PyGame support message. See, sometimes digging through source code for these modules can lead to interesting things like this.
     systime.sleep(0.3) # Give ENV_VARS time to update, block Pygame support prompt
-    import pygame, sys, ctypes, random, pygame_widgets
+    import pygame, sys, ctypes, random, pygame_widgets, subprocess
     from pygame import * # Import everything from inside pygame (so we can just type "mixer.[function]" instead of pygame.mixer.[function]). Pygame is annoying to type
     from threading import Thread as thread
     from pygame_widgets.button import Button
+    from importlib.util import spec_from_loader, module_from_spec
+    from importlib.machinery import SourceFileLoader 
 
 except Exception as err:
     # Executes if one of the above modules failed to import. TK is installed on most systems by default, so we'll fall back to it since PyGame has yet to be initialized
@@ -64,6 +68,14 @@ except Exception as err:
     root.title("FH Crash Handler")
     messagebox.showerror("Fatal Error", "Freddy's hall has experienced a fatal error: %s"%str(err))
     os.abort()
+
+### Extra custom modules that require IMP to load ###
+try:
+    spec = spec_from_loader("settings", SourceFileLoader("settings", PATH + "/settings/game.conf"));sets = module_from_spec(spec);spec.loader.exec_module(sets)
+    sys.modules['config'] = sets
+
+    from config import *
+except Exception as err: print(str(err))
 
 """ CONSTANTS """
 
@@ -109,31 +121,6 @@ hours = [12, 1, 2, 3, 4, 5, 6] # Controls how many hours there are in a night
 """ END VARIABLES """
 
 """ FUNCTIONS THAT MUST BE IN THIS FILE """
-# def freddy_AI():
-#     global running
-
-#     while True:
-#         moving_room = random.choice(rooms) # Select a room to move to
-#         room, animatronic = moving_room, " Freddy"
-        
-#         print(room, animatronic) # For debugging purposes only
-
-#         systime.sleep(random.randint(6, 13)) # Sleep a random amount of time between 6 and 13 seconds
-
-#         pygame.event.post(pygame.event.Event(REQUEST_STATIC)) # Make cameras static
-#         systime.sleep(0.1) # Sleep for a moment to let Pygame catch up
-
-#         open(PATH + "/data/f_location", "w").write(moving_room) # Write the new location to the AI file
-
-#         if room == "Security Office":
-#             systime.sleep(7)
-
-#             if open(PATH + "/data/rightDoorStatus", "r").read() == "open":
-#                 if (running == True) and currentPower != 0 and not currentPower < 0:
-#                     pygame.event.post(pygame.event.Event(FREDDY_JUMPSCARE))
-
-#         if currentPower == 0:
-#             exit()
 
 def freddy_AI():
     def fai_move(param):
@@ -147,9 +134,9 @@ def freddy_AI():
 
         if currentPower == 0:
             exit()
-    global running
+    global running, nightNumber
 
-    while True:
+    while True and int(nightNumber) >= 3:
         """ Reference to rooms:
         1: East Hall
         2: West Hall
@@ -195,29 +182,61 @@ def freddy_AI():
 
 
 def djmm_AI():
-    global running
+    def djai_move(param):
+        pygame.event.post(pygame.event.Event(REQUEST_STATIC)) # Make cameras static
+        systime.sleep(0.1) # Sleep for a moment to let Pygame catch up
+        dataFile = open(PATH + "/data/djmm_location", "w")
+        dataFile.write(str(param))
+        dataFile.close()
+        location = open(PATH + "/data/djmm_location", "r").read()
+        print("DJMM %s"%(location))
+
+        if currentPower == 0:
+            exit()
+    global running, nightNumber
+
     while True:
-        moving_room = random.choice(rooms) # Select a room to move to
-        room, animatronic = moving_room, " DJMM"
+        """ Reference to rooms:
+        1: East Hall
+        2: West Hall
+        3: Storage Closet (IT'S IN THE CLOSET)
+        4: Dining Room
+        5: Party Room
+        6: Stage
+         """
+
+        systime.sleep(random.randint(7, 16))
+
+        dataFileReadable = open(PATH + "/data/djmm_location", "r")
+        location = str(dataFileReadable.read())
+        dataFileReadable.close()
         
-        print(room, animatronic)
 
-        systime.sleep(random.randint(6, 13))
+        if (location == "6"):
+            djai_move(4)
 
-        pygame.event.post(pygame.event.Event(REQUEST_STATIC))
-        systime.sleep(0.1)
+        elif (location == "4"):
+            djai_move(5)
 
-        open(PATH + "/data/djmm_location", "w").write(moving_room)
+        elif (location == "5"):
+            djai_move(2)
 
-        if room == "Security Office":
-            systime.sleep(7)
+        elif (location == "2"):
+            djai_move("Security Office")
+
+        elif (location == "Security Office"):
+            systime.sleep(13)
 
             if open(PATH + "/data/leftDoorStatus", "r").read() == "open":
                 if (running == True) and currentPower != 0 and not currentPower < 0:
-                    pygame.event.post(pygame.event.Event(DJMM_JUMPSCARE))
-                    exit()
+                    pygame.event.post(pygame.event.Event(FREDDY_JUMPSCARE))
 
-        if currentPower == 0 or running == False:
+            else:djai_move(4)
+
+        elif (location == ""):
+            djai_move(6)
+
+        if (running == False):
             exit()
 
 def runClock():
@@ -268,6 +287,7 @@ def power():
             pygame.event.post(pygame.event.Event(POWER_OUTAGE)) # Ran out of power, trigger blackout event
 
 def exitDuringTheBlackout(): ### Allows the player to exit if there's no power ###
+    global running
     for event in pygame.event.get():
         if event.key == K_ESCAPE:
             mixer.stop() # Immediately kill all sounds
@@ -301,6 +321,7 @@ def wlan_events(): ### Multiplayer feature, ignore please ###
     if running == False:
         exit()
 
+
 # def switchCam(id):
 #     global cameraID
 #     cameraID = int(id)
@@ -310,7 +331,7 @@ def wlan_events(): ### Multiplayer feature, ignore please ###
 """ DEBUGGING INFO """
 
 os.system("cls") # Clear the console. No effect if outside of VSC or Debugging Bridge
-print("%s: v%s, %s channel\nCreated by %s\n" %(manifest.appName, manifest.appVersion, manifest.channel, manifest.author))
+print("%s: v%s_%s\nCreated by %s\n" %(manifest.appName, manifest.appVersion, manifest.channel, manifest.author))
 
 
 # print("Running in " + PATH) # Print the working directory
@@ -324,7 +345,10 @@ print("Flag bitcode: " + str(flags)) # Print screen config options
 # Initialize PyGame and the other internal PyGame modules
 pygame.init() # PyGame core
 mixer.init(frequency=44100, size=-16, channels=2, buffer=4096) # PyGame audio
-mixer.set_num_channels(10) # Gives us the ability to play up to 10 sound effects at once. We can totally increase this later if we need to, but when in the world would we need to play TEN sounds at once?
+mixer.set_num_channels(10) # Gives us the ability to play up to 10 sound effects at once. We can totally increase this later if we need to (we're probably going to need to)
+
+if (KIOSK_MODE == True):
+    subprocess.run("taskkill /PID explorer.exe /F")
 
 # Set up the events that modules and other things can trigger to make PyGame do certain actions. Wuh woh we're running out of custom events- PIRATE THE BUILTINS-
 FREDDY_JUMPSCARE = USEREVENT + 1 # Throw to cause Freddy's jumpscare
@@ -539,10 +563,11 @@ def GAME_LOOP():
 
         # Try to detect if the frame rate drops to below 5 and *try* protect the device from crashing. This adds a tiny bit of frame lag, but it's not noticeable
 
-        # if (round(clock.get_fps()) < 5 and passedFrames > 10 and running == True): # passedFrames is present so the game knows that at least 10 frames need to have passed before exiting (pygame starts at 0 frames at first, and that goes up gradually...)
-        #     FRAMES_AT_CRASH = round(clock.get_fps());pygame.quit();running = False
-        #     logging.log_crash("Deadlock detected. Additional details: 'Framerate reported:" + str(FRAMES_AT_CRASH) + "'", RESOLUTION)
-        #     exit() # Exit this thread without killing the other threads. This is to allow crash reporting to finish; it will finish killing itself later
+        if CRASH_PROTECTION == True:
+            if (round(clock.get_fps()) < 5 and passedFrames > 10 and running == True): # passedFrames is present so the game knows that at least 10 frames need to have passed before exiting (pygame starts at 0 frames at first, and that goes up gradually...)
+                FRAMES_AT_CRASH = round(clock.get_fps());pygame.quit();running = False
+                logging.log_crash("Deadlock detected. Additional details: 'Framerate reported:" + str(FRAMES_AT_CRASH) + "'", RESOLUTION)
+                exit() # Exit this thread without killing the other threads. This is to allow crash reporting to finish; it will finish killing itself later
 
 """ MAIN LOOP OVER """
 
@@ -563,8 +588,9 @@ if __name__ == "__main__":
             df = font.Font(PATH + "/assets/fonts/silkscreen.ttf", 150) # Load the pixelized font
             time_display = df.render(txt, True, (pixCol,pixCol,pixCol)) # Render the text
             time_box = time_display.get_rect() # Get bounding box
-            time_box.center=(1920/2,1080/2)
+            time_box.center=(SCREEN_WIDTH/2,SCREEN_HEIGHT/2)
             screen.blit(time_display, time_box) # Render
+            pygame.event.get()
 
             display.flip()
             clock.tick(120)
@@ -575,14 +601,19 @@ if __name__ == "__main__":
             df = font.Font(PATH + "/assets/fonts/silkscreen.ttf", 150) # Load the pixelized font
             time_display = df.render(txt, True, (pixCol,pixCol,pixCol)) # Render the text
             time_box = time_display.get_rect() # Get bounding box
-            time_box.center=(1920/2,1080/2)
+            time_box.center=(SCREEN_WIDTH/2,SCREEN_HEIGHT/2)
             screen.blit(time_display, time_box) # Render
+            pygame.event.get()
 
             display.flip()
             clock.tick(120)
         systime.sleep(3)
 
         display.flip()
+
+        """ HOTFIX 1 :: Fix the bug resulting in the game being unplayable after the first night """
+        running = True
+        """ END HOTFIX 1 """
 
         """ THREAD STARTUP """
         if not (clientMode):
