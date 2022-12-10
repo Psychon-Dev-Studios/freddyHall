@@ -1,0 +1,12 @@
+# Current Hotfixes
+    [!] HF1: Force-sets the RUNNING variable back to TRUE when you click PLAY
+    
+
+
+# Fully-Patched / Removed Hotfixes:
+    [x] None [x]
+    [!!] HF2 (verifier.py): Modified file verf script, individually loops through files and discards .pyc files to prevent invalid "FILES MISSING" warnings
+        [!!] This hotfix doesn't work properly, a full bugbust is going to be needed for this one (or just complete removal, it doesn't really need to be here and just makes startup take a lot longer)
+        [!!] Removed because of dramatically increased startup times
+
+    [ ]
